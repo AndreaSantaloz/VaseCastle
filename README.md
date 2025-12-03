@@ -548,8 +548,11 @@ function updatePhysics(deltaTime) {
 - `rb0, rb1`: Cuerpos rígidos en colisión
 - `threeObject0, threeObject1`: Objetos Three.js asociados
 
----
 
+
+## Demo
+
+---![AndreaSantanaLopez](https://github.com/user-attachments/assets/cccbd1c5-f6fd-4e19-b66e-f89fcbe41df8)
 ## 📞 Contacto
 **Andrea Santaloz**  
 GitHub: [@AndreaSantaloz](https://github.com/AndreaSantaloz)  
