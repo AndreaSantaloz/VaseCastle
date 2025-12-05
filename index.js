@@ -23,14 +23,14 @@ const margin = 0.05;
 
 const convexBreaker = new ConvexObjectBreaker();
 
-// Variables para la nueva estructura de Vasos
-const cupRadiusTop = 0.8; // Radio superior del vaso (base invertida)
-const cupRadiusBottom = 0.6; // Radio inferior del vaso (boca invertida)
-const cupHeight = 1.2; // Altura del vaso
-const cupMass = 5; // Masa de cada vaso (más ligera que los bloques originales)
-const cupSegments = 16; // Segmentos para suavidad
 
-// Rigid bodies include all movable objects
+const cupRadiusTop = 0.8;
+const cupRadiusBottom = 0.6; 
+const cupHeight = 1.2; 
+const cupMass = 5; 
+const cupSegments = 16; 
+
+
 const rigidBodies = [];
 
 const pos = new THREE.Vector3();
@@ -114,14 +114,12 @@ function initGraphics() {
   stats.domElement.style.top = "0px";
   container.appendChild(stats.domElement);
 
-  //
+  
 
   window.addEventListener("resize", onWindowResize);
 }
 
 function initPhysics() {
-  // Physics configuration
-  // AMMO -> PhysicsAmmo
   collisionConfiguration = new PhysicsAmmo.btDefaultCollisionConfiguration();
   dispatcher = new PhysicsAmmo.btCollisionDispatcher(collisionConfiguration);
   broadphase = new PhysicsAmmo.btDbvtBroadphase();
@@ -138,13 +136,12 @@ function initPhysics() {
   tempBtVec3_1 = new PhysicsAmmo.btVector3(0, 0, 0);
 }
 
-// REMOVIDA: createObject() que usaba BoxGeometry
-// AÑADIDA: createCup() con CylinderGeometry para simular el vaso invertido
+
 function createCup(mass, pos, quat, color) {
   const cupGeometry = new THREE.CylinderGeometry(
-    cupRadiusTop, // Radio superior (Base del vaso invertido)
-    cupRadiusBottom, // Radio inferior (Boca del vaso invertido)
-    cupHeight, // Altura
+    cupRadiusTop, 
+    cupRadiusBottom, 
+    cupHeight,
     cupSegments
   );
 
@@ -154,7 +151,7 @@ function createCup(mass, pos, quat, color) {
   object.position.copy(pos);
   object.quaternion.copy(quat);
 
-  // Prepara el objeto para romperse
+
   convexBreaker.prepareBreakableObject(
     object,
     mass,
@@ -166,7 +163,7 @@ function createCup(mass, pos, quat, color) {
 }
 
 function createObjects() {
-  // Ground
+
   pos.set(0, -0.5, 0);
   quat.set(0, 0, 0, 1);
   const ground = createParalellepipedWithPhysics(
@@ -187,32 +184,19 @@ function createObjects() {
     ground.material.needsUpdate = true;
   });
 
-  // --- Estructura de Vasos (Pirámide de 8 niveles) ---
-  // Usaremos un array de colores para que se vea más interesante
-  const baseColors = [0xfdd835, 0xe53935, 0x1e88e5, 0x43a047]; // Amarillo, Rojo, Azul, Verde
-  const cupSpacing = cupRadiusTop * 2 * 1.05; // Espacio horizontal entre vasos
 
-  // El bucle principal irá desde el nivel 1 (base) hasta el nivel 8 (pico)
+  const baseColors = [0xfdd835, 0xe53935, 0x1e88e5, 0x43a047];
+  const cupSpacing = cupRadiusTop * 2 * 1.05; 
+
   const totalLevels = 8;
-  const initialCups = 8; // La base tendrá 8 vasos
-
+  const initialCups = 8;
+  
   for (let level = 1; level <= totalLevels; level++) {
     const numCups = initialCups - (level - 1);
-
-    // Si llegamos a 0 vasos (o menos, aunque no debería), detenemos el bucle
     if (numCups <= 0) break;
-
-    // Color: Ciclo a través de los colores del array
     const color = baseColors[(level - 1) % baseColors.length];
-
-    // Posición Y: La altura se basa en el número de niveles completados debajo
     const yOffset = (level - 1) * cupHeight;
-
-    // Posición X inicial: Centrar la fila de vasos
-    // (Número de espacios * Espaciado) / 2
     const startX = -((numCups - 1) * cupSpacing) / 2;
-
-    // Colocar los vasos en la fila
     for (let i = 0; i < numCups; i++) {
       pos.set(startX + i * cupSpacing, yOffset + cupHeight / 2, 0);
       quat.set(0, 0, 0, 1);
@@ -220,9 +204,6 @@ function createObjects() {
     }
   }
 }
-
-// El resto de funciones (init, initGraphics, initPhysics, createCup, etc.) se mantienen igual.
-// Solo reemplaza la función createObjects() en tu código original con esta versión.
 
 function createParalellepipedWithPhysics(
   sx,
@@ -237,7 +218,7 @@ function createParalellepipedWithPhysics(
     new THREE.BoxGeometry(sx, sy, sz, 1, 1, 1),
     material
   );
-  // AMMO -> PhysicsAmmo
+
   const shape = new PhysicsAmmo.btBoxShape(
     new PhysicsAmmo.btVector3(sx * 0.5, sy * 0.5, sz * 0.5)
   );
@@ -267,8 +248,7 @@ function createDebrisFromBreakableObject(object) {
     object.userData.angularVelocity
   );
 
-  // Set pointer back to the three object only in the debris objects
-  // AMMO -> PhysicsAmmo
+  
   const btVecUserData = new PhysicsAmmo.btVector3(0, 0, 0);
   btVecUserData.threeObject = object;
   body.setUserPointer(btVecUserData);
@@ -281,7 +261,6 @@ function removeDebris(object) {
 }
 
 function createConvexHullPhysicsShape(coords) {
-  // AMMO -> PhysicsAmmo
   const shape = new PhysicsAmmo.btConvexHullShape();
 
   for (let i = 0, il = coords.length; i < il; i += 3) {
@@ -306,7 +285,6 @@ function createRigidBody(object, physicsShape, mass, pos, quat, vel, angVel) {
     quat = object.quaternion;
   }
 
-  // AMMO -> PhysicsAmmo
   const transform = new PhysicsAmmo.btTransform();
   transform.setIdentity();
   transform.setOrigin(new PhysicsAmmo.btVector3(pos.x, pos.y, pos.z));
@@ -346,7 +324,7 @@ function createRigidBody(object, physicsShape, mass, pos, quat, vel, angVel) {
   if (mass > 0) {
     rigidBodies.push(object);
 
-    // Disable deactivation
+
     body.setActivationState(4);
   }
 
@@ -373,7 +351,7 @@ function initInput() {
 
     raycaster.setFromCamera(mouseCoords, camera);
 
-    // Creates a ball and throws it
+   
     const ballMass = 35;
     const ballRadius = 0.4;
 
@@ -383,7 +361,7 @@ function initInput() {
     );
     ball.castShadow = true;
     ball.receiveShadow = true;
-    // AMMO -> PhysicsAmmo
+   
     const ballShape = new PhysicsAmmo.btSphereShape(ballRadius);
     ballShape.setMargin(margin);
     pos.copy(raycaster.ray.direction);
@@ -419,10 +397,9 @@ function render() {
 }
 
 function updatePhysics(deltaTime) {
-  // Step world
+
   physicsWorld.stepSimulation(deltaTime, 10);
 
-  // Update rigid bodies
   for (let i = 0, il = rigidBodies.length; i < il; i++) {
     const objThree = rigidBodies[i];
     const objPhys = objThree.userData.physicsBody;
@@ -441,7 +418,6 @@ function updatePhysics(deltaTime) {
 
   for (let i = 0, il = dispatcher.getNumManifolds(); i < il; i++) {
     const contactManifold = dispatcher.getManifoldByIndexInternal(i);
-    // AMMO -> PhysicsAmmo
     const rb0 = PhysicsAmmo.castObject(
       contactManifold.getBody0(),
       PhysicsAmmo.btRigidBody
@@ -451,12 +427,12 @@ function updatePhysics(deltaTime) {
       PhysicsAmmo.btRigidBody
     );
 
-    // AMMO -> PhysicsAmmo
+
     const threeObject0 = rb0.getUserPointer()
       ? PhysicsAmmo.castObject(rb0.getUserPointer(), PhysicsAmmo.btVector3)
           .threeObject
       : null;
-    // AMMO -> PhysicsAmmo
+  
     const threeObject1 = rb1.getUserPointer()
       ? PhysicsAmmo.castObject(rb1.getUserPointer(), PhysicsAmmo.btVector3)
           .threeObject
@@ -500,10 +476,10 @@ function updatePhysics(deltaTime) {
       }
     }
 
-    // If no point has contact, abort
+
     if (!contact) continue;
 
-    // Subdivision
+  
 
     const fractureImpulse = 250;
 
